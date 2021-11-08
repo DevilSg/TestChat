@@ -1,0 +1,41 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@if (this.User.Identity.IsAuthenticated)
+{
+    <div class="text-center">
+        <input type="button" value="Bro!" id="brom" />
+        <input type="button" value="Sis!" id="sism" />
+    </div>
+    <div id="chatroom"></div>
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.7/signalr.min.js"></script>
+<script>
+    const hubConnection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+    hubConnection.on('Bro', function (User) {
+        let elem = document.createElement("div");
+        let now = new Date();
+        elem.innerHTML = 'Bro! <div id="s"> Sent by ' + User + ' at ' + now.getHours() + ':' + now.getMinutes() + '<div>';
+        document.getElementById("chatroom").appendChild(elem);
+    });
+    hubConnection.on('Sis', function (User) {
+        let elem = document.createElement("div");
+        let now = new Date();
+        elem.innerHTML = 'Sis! <div id="s"> Sent by ' + User + ' at ' + now.getHours() + ':' + now.getMinutes() + '<div>';
+        document.getElementById("chatroom").appendChild(elem);
+    });
+
+    // отправка сообщения на сервер
+    document.getElementById("brom").addEventListener("click", function (e) {
+        hubConnection.invoke('Send');
+    });
+    document.getElementById("sism").addEventListener("click", function (e) {
+        hubConnection.invoke('SendSis');
+    });
+
+    hubConnection.start();
+</script>
